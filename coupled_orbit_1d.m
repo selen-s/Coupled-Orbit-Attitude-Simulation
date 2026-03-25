@@ -7,7 +7,8 @@ phi = sv(3*N+1:4*N);
 tau = sv(4*N+1:5*N);
 
 numelems = 4*N;
-massM = sparse( ); 
+% massM = mass_matrix( ); 
+
 
 
 end
