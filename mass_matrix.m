@@ -3,7 +3,7 @@
 % dp = distance plus, dm = distance minus, N  = number of links, J = MOI
 % tensor, masses = masses of links
 % written by Selen Serdar, last updated 3/29/2026
-%
+
 function M = mass_matrix(dp, dm, N, J, masses)
 
 m = zeros(2*N); % preallocate matrix
@@ -23,18 +23,21 @@ for idx = 1:N % compute eqn 29
     % for the 0th link:
     if idx == 1
         row(idx) = Jn; % angular accel term 
-        row(idx + N) = skew(dp(N)) * R * masses(idx); % linear accel term 
-
+        row(idx + N) = -skew(dp(idx)) * R * masses(idx); % linear accel term 
+        extra = 1; 
     % compute for the middle links: 
     elseif idx > 1 && idx < N
-        row(idx) = ;
-        row(idx + N) = ; 
-
+        row(idx) = Jn;
+        row(idx + N) = -skew(dp(idx)) * R * masses(idx); 
+        extra = -skew(dp(idx) - dm(idx)) * R;
      % for the final link: 
     elseif idx == N
         row(idx) = Jn; % angular acc
         row(idx + N) = -skew(dm(idx)) * R; % linear acc
+        extra = -skew(dm(idx)) * R;
     end
+    
+    row(idx+N) = row(idx+N) * extra; % incorporate factor multiplying the sums
 
     % append the new row to m:
     m = [m ; row];

@@ -5,7 +5,7 @@
 %(N)
 % outputs 
 % written by Selen Serdar, last updated 3/29/2026
-function [sv_derivative] = coupled_orbit_1d(t, sv, masses, J, N)
+function [sv_derivative] = coupled_orbit_1d(t, sv, masses, J, N, dp, dm)
 
 % categorize inputs from state vector.
 w = sv(1:N); % angular velocities (rad/s)
@@ -16,7 +16,7 @@ tau = sv(4*N+1:5*N); % torques (Nm)
 
 % create the matrix of constants:
 % constM = constant_matrix(); 
-massM = mass_matrix(w, x, R, phi, tau, N); 
+massM = mass_matrix(dp, dm, N, J, masses); 
 
 % return the derivative of state vector
 sv_derivative = inv(massM) * constM; 
