@@ -1,8 +1,10 @@
-%{ sv_derivative: inputs are current time(t) in s, state vector (sv), link
+%% coupled_orbit_1d 
+% compute the coupled orbit attitude problem. 
+% sv_derivative: inputs are current time(t) in s, state vector (sv), link
 %masses (masses) in kg, moment of inertia tensor (J) , and number of links
 %(N)
 % outputs 
-%}
+% written by Selen Serdar, last updated 3/29/2026
 function [sv_derivative] = coupled_orbit_1d(t, sv, masses, J, N)
 
 % categorize inputs from state vector.
@@ -11,8 +13,6 @@ x = sv(N+1:2*N); % positions (m)
 R = sv(2*N+1:3*N); % rotation matrix 
 phi = sv(3*N+1:4*N); % external forces (N)
 tau = sv(4*N+1:5*N); % torques (Nm)
-
-numelems = 4*N; % number of elements to put in the sparse matrix
 
 % create the matrix of constants:
 % constM = constant_matrix(); 

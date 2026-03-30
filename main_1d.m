@@ -1,4 +1,7 @@
 % coupled orbit attitude MAIN
+%
+% propagate coupled orbit attitude simulation in ode45.
+% written by Selen Serdar, last updated 3/29/2026
 clc;clear;close all;
 N = 100; % number of links
 omegas = zeros(1,N);
