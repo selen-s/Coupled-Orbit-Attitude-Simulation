@@ -17,10 +17,7 @@ for idx = 1:N % compute eqn 29
   %  R = get_R(N); % get rotation mtx for the link 
     R = 1;
     %% account for the summations of previous iterations
-    if idx == 1
-        tracksum_row(idx + N) = 0;
-    else
-        tracksum_row(idx - 1 + N) = masses(idx - 1) ; 
+    tracksum_row(idx + N) = masses(idx) ;
 
     %% put in the stepwise-varied terms (coefficients of ddotX and ddotw)
     % for the 0th link:
