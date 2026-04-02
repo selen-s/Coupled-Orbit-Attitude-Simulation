@@ -5,9 +5,9 @@
 %(N)
 % outputs 
 % written by Selen Serdar, last updated 3/29/2026
-function [sv_derivative] = coupled_orbit_1d(t, sv, masses, J, N, dp, dm)
+function [sv_derivative] = coupled_orbit_1d(t, sv, masses, J, num, dp, dm)
 
-
+N = 
 % categorize inputs from state vector.
 w = sv(1:N); % angular velocities (rad/s)
 x = sv(N+1:2*N); % positions (m)

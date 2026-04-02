@@ -11,10 +11,11 @@ tracksum_row = zeros(2*N); % tracking summations - does not reset each iteration
 
 for idx = 1:N % compute eqn 29 
  
-    Jn = J{idx}; % get MOI for current link
+   % Jn = J{idx}; % get MOI for current link
+    Jn = J(idx); 
 
-    R = get_R(N); % get rotation mtx for the link 
-
+  %  R = get_R(N); % get rotation mtx for the link 
+    R = 1;
     %% account for the summations of previous iterations
     tracksum_row(idx) = masses(idx) ;
     row = tracksum_row; 
@@ -23,18 +24,24 @@ for idx = 1:N % compute eqn 29
     % for the 0th link:
     if idx == 1
         row(idx) = Jn; % angular accel term 
-        row(idx + N) = -skew(dp(idx)) * R * masses(idx); % linear accel term 
+
+        % row(idx + N) = -skew(dp(idx)) * R * masses(idx); % linear accel term 
+        row(idx + N) = -(dp(idx)) * R * masses(idx); % linear accel term 
         extra = 1; 
     % compute for the middle links: 
     elseif idx > 1 && idx < N
         row(idx) = Jn;
-        row(idx + N) = -skew(dp(idx)) * R * masses(idx); 
-        extra = -skew(dp(idx) - dm(idx)) * R;
+        %row(idx + N) = -skew(dp(idx)) * R * masses(idx); 
+        row(idx + N) = -(dp(idx)) * R * masses(idx); 
+        %extra = -skew(dp(idx) - dm(idx)) * R;
+        extra = -(dp(idx) - dm(idx)) * R;
      % for the final link: 
     elseif idx == N
         row(idx) = Jn; % angular acc
-        row(idx + N) = -skew(dm(idx)) * R; % linear acc
-        extra = -skew(dm(idx)) * R;
+        %row(idx + N) = -skew(dm(idx)) * R; % linear acc
+        row(idx + N) = -(dm(idx)) * R; % linear acc
+        %extra = -skew(dm(idx)) * R;
+        extra = -(dm(idx)) * R;
     end
     
     row(idx+N) = row(idx+N) * extra; % incorporate factor multiplying the sums
