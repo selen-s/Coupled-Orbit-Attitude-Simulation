@@ -20,4 +20,5 @@ massM = mass_matrix(dp, dm, N, J, masses);
 
 % return the derivative of state vector
 sv_derivative = inv(massM) * constM; 
+
 end
