@@ -7,7 +7,7 @@ clc;clear;close all;
 
 N = 20; % number of links
 
-% INITIAL CONDITIONS ======================================================
+% INITIAL CONDITIONS =========sssssssss=============================================
 
 omega_tot = 2 * pi / (22.5 * 60);  % How fast is the tether spinning? [rad/s]
 % make sure the R matrices and omegas work
@@ -42,7 +42,7 @@ dplus = [1;0;0;]; % how far is the current link's CoM from the next link's joint
 dminus = [1;0;0]; % how far is current link's CoM from previous link's joint? [m]
 
 % assemble the initial state vector (column)
-sv0 = [omegas x R phi tau]';3
+sv0 = [omegas x R phi tau]';
 
 % timespan [s]
 tspan = 0:.01:10;

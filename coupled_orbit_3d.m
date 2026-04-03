@@ -16,9 +16,12 @@ tau = sv(12*N+1:15*N); % torques (Nm)
 
 % create the matrix of constants:
 % constM = constant_matrix(); 
-constM = sparse(eye(15*N));
+constM = sparse(eye(3*N));
 massM = mass_matrix_3d(dp, dm, N, masses, R, J); 
 
+svsiz = size(sv)
+csize = size(constM)
+msize = size(massM)
 % return the derivative of state vector
 sv_derivative = constM * sv / massM ; 
 
