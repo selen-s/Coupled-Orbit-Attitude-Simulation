@@ -29,6 +29,11 @@ mt = 10000;  % How massive is the catch mechanism? [kg]
 masses = [mc ones(1,N-2) mt]; % vector of masses [kg]
 link_length = L / N; % length of each link [m]
 
+% create a cell array for J
+
+% why is this a cell array? All of the data are the same type. Make this a
+% 3-tensor for faster operations
+
 J = zeros(3,3,N);
 % form each link's inertia tensor
 for k = 1:N

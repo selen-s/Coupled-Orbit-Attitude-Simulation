@@ -4,35 +4,47 @@
 % masses of links, Rlist = rotation matrices at current timestep
 % written by Selen Serdar, last updated 4/3/2026
 
-function M = mass_matrix_3d(dp, dm, N, masses, Rlist, J)
+function M = mass_matrix_3d(dp, dm, N, masses, qlist, J)
 
-m = zeros(6*N,6*N); % preallocate matrix
+
+m = zeros(6*N,6*N); % preallocate mass matrix
 tracksum_row = zeros(3,6*N); % tracking summations - does not reset each iteration
 
 %% First half of the mass matrix ==========================================
-for idx = 1:N % compute eqn 29 
- 
-    Jmat = J{idx}; 
-    Jn = Jmat(1:3,1:3);
-    R = Rlist(idx);
+c = 1; % count link number
+
+% convert the quats back into DCM to use 
+for k = 1:N
+    q = qlist(4*(k-1)+1 : 4*k)';
+    Rlist(:,:,k) = quat2dcm(q);
+end
+
+for idx = 1:3*N % compute eqn 29 
+    
+    Jn = J(:,:,c);
+    R = Rlist(:,:,c);
+    mass = masses(c); % current link mass [kg]
+    
     %% account for the summations of previous iterations
-    if idx == 1
+    if idx == 1 || c == 1
         tracksum_row(1:3, idx + N) = [0;0;0];
     else
-        tracksum_row(1:3, idx - 1 + N) = [masses(idx - 1); masses(idx-1); masses(idx-1)] ; 
+        prevm = masses(c-1); % previous link mass [kg]
+        tracksum_row(1:3, idx + N) = [prevm; prevm; prevm] ; 
     end
 
-    row = zeros(3,6*N);
+    row = zeros(3,6*N); % initialize row 
+
     %% put in the stepwise-varied terms (coefficients of ddotX and dotw)
     % for the 0th link:
     if idx == 1 
         row(1:3, idx:idx+2) = Jn(1:3,1:3); % angular accel term 
-        row(1:3,idx+N:idx+2+N) = -skew(dp) * R * masses(idx); % linear accel term 
+        row(1:3,idx+N:idx+2+N) = -skew(dp) * R * mass; % linear accel term 
         extra = 1; 
     % compute for the middle links: 
     elseif idx > 1 && idx < N
         row(1:3, idx:idx+2) = Jn;
-        row(1:3, idx+N:idx+2+N) = -skew(dp) * R * masses(idx); 
+        row(1:3, idx+N:idx+2+N) = -skew(dp) * R * mass; 
         extra = -skew(dp - dm) * R;
      % for the final link: 
     elseif idx == N
@@ -45,27 +57,44 @@ for idx = 1:N % compute eqn 29
 
     % append the new row to m:
     m = [m ; row];
+
+    % decide which link it is calculating
+    if c == 20
+        c = 1; % reset c 
+    else
+        c = c + 1;
+    end
 end
- clear row
+ clear row idx c R
+ size(m)
+
 %% Second half of the mass matirx =========================================
 % use eqn 26 - same for each link
+c = 1; % counting variable 1 - 20 
 for idx = 1:6*N-1
-    R1 = Rlist(idx+1);
-    row = zeros(3, 3*N); % re initialize row
+    R = Rlist(:,:,c);
+    row = zeros(3, 6*N); % re initialize row
     % angular velocity multipliers:
     row(1:3, idx:idx+2) = R' * skew(dp);
-    row(1:3, idx+1:idx+3) = -R1' * skew(dm); 
+    row(1:3, idx+1:idx+3) = -R' * skew(dm); 
     
     % ddotx multipliers:
     row(1:3, 1) = 1;
     row(1:3, idx) = 1 ;
-
+    
     if idx == 6*N-6
-        row(1:3, idx+1:idx+3) = 1;
+        row(1:3, idx:idx+5) = 1;
     end
+    r= size(row)
+    m = size(m)
     % append the new row to m: 
     m = [m; row];
 
+    if c == 20
+        c = 1; % reset c 
+    else
+        c = c + 1;
+    end
 end
 
 M = sparse(m); % return a sparse mass matrix
