@@ -32,17 +32,17 @@ J = {};
 % form each link's inertia tensor
 for k = 1:N
     m = masses(k); 
-    J(k) = [1/12 *m * (3*r^2 + link_length^2) 0 0;
+    J{k} = [1/12 *m * (3*r^2 + link_length^2) 0 0;
         0 1/12 * m *(3*r^2 + link_length^2) 0;
-        0 0 1/2*m*R^2]; 
+        0 0 1/2*m*r^2]; 
 end
 
 % set up d vectors 
-dplus = ones(1,N-1); % how far is the current link's CoM from the next link's joint? [m]
-dminus = ones(1,N-1); % how far is current link's CoM from previous link's joint? [m]
+dplus = [1;0;0;]; % how far is the current link's CoM from the next link's joint? [m]
+dminus = [1;0;0]; % how far is current link's CoM from previous link's joint? [m]
 
 % assemble the initial state vector (column)
-sv0 = [omegas x R phi tau]';
+sv0 = [omegas x R phi tau]';3
 
 % timespan [s]
 tspan = 0:.01:10;
@@ -50,14 +50,46 @@ tspan = 0:.01:10;
 % PROPAGATE ===============================================================
 options = odeset('RelTol',1e-12,'AbsTol',1e-12);
 
-[tout, yout] = ode45(@(t, sv, masses, J, N, dplus, dminus)coupled_orbit_1d, tspan, sv0, options);
+[tout, yout] = ode45(@(t, sv)coupled_orbit_3d(t, sv,masses, J, N, dplus, dminus), tspan, sv0, options);
 
-omegas_final = yout(:, 1:3);
-x_final = yout(:, 4:6);
+omegas_final = yout(:, 1:3); % angular velocity output
+x_final = yout(:, 4:6); % pos output
+
+for idx = 1:3*N % sort the compoennts into vectors for plotting
+    if mod(idx, 3) == 2 % x component 
+        wx(idx) = omegas(idx, 1);
+        posx(idx) = x(idx, 1);
+    elseif mod(idx,3) == 1 % y component
+        wy(idx) = omegas(idx, 2);
+        posy(idx) = x(idx, 2);
+    else % z component
+        wz(idx) = omegas(idx, 3);
+        posz(idx) = x(idx, 3);
+    end
+end
 
 % plot the results 
-% figure(1)
-% plot(tspan, omegas_final)
-% hold on
-% plot(tspan, x_final)
-% legend("angular velocity", "position")
+figure(1)
+subplot(3,2, 1)
+plot(tspan, wx)
+title("Angular velocity (x) [rad/s]")
+
+subplot(3,2,2)
+plot(tspan, posx)
+title("Velocity (x) [m/s]")
+
+subplot(3,2,3)
+plot(tspan, wy)
+title("Angular velocity (y) [rad/s]")
+
+subplot(3,2,4)
+plot(tspan, posy)
+title("Velocity (y) [m/s]")
+
+subplot(3,2,5)
+plot(tspan, wz)
+title("Angular velocity (z) [rad/s]")
+
+subplot(3,2,6)
+plot(tspan, posz)
+title("Velocity (z) [m/s]")

@@ -7,9 +7,9 @@
 function M = mass_matrix_3d(dp, dm, N, masses, Rlist, J)
 
 m = zeros(3*N); % preallocate matrix
-tracksum_row = zeros(3*N); % tracking summations - does not reset each iteration
+tracksum_row = zeros(2*N); % tracking summations - does not reset each iteration
 
-for idx = 1:N % compute eqn 29 
+for idx = 1:3*N % compute eqn 29 
  
     Jn = J{idx}; 
     Jnx = Jn(1,1);
@@ -24,22 +24,22 @@ for idx = 1:N % compute eqn 29
         tracksum_row(idx - 1 + N) = masses(idx - 1) ; 
     end
 
-    row = {};
+    row = zeros()
     %% put in the stepwise-varied terms (coefficients of ddotX and dotw)
     % for the 0th link:
     if idx == 1 
-        row{idx, idx:idx+2}= Jn; % angular accel term 
-        row{idx + N,idx:idx+2} = -skew(dp) * R * masses(idx); % linear accel term 
+        row(idx) = Jn; % angular accel term 
+        row(idx + N) = -skew(dp) * R * masses(idx); % linear accel term 
         extra = 1; 
     % compute for the middle links: 
     elseif idx > 1 && idx < N
-        row{idx, idx:idx+2} = Jn;
-        row{idx + N, idx:idx+2} = -skew(dp) * R * masses(idx); 
+        row(idx) = Jn;
+        row(idx + N) = -skew(dp) * R * masses(idx); 
         extra = -skew(dp - dm) * R;
      % for the final link: 
     elseif idx == N
-        row{idx, idx:idx+2} = Jn; % angular accb
-        row{idx + N, idx:idx+2} = -skew(dm) * R; % linear acc
+        row(idx) = Jn; % angular accb
+        row(idx + N) = -skew(dm) * R; % linear acc
         extra = -skew(dm) * R;
     end
     
