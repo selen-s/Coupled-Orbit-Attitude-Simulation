@@ -34,7 +34,7 @@ for idx = 1:N % compute eqn 29
         extra = -skew(dp(idx) - dm(idx)) * R;
      % for the final link: 
     elseif idx == N
-        row(idx) = Jn; % angular acc
+        row(idx) = Jn; % angular accb
         row(idx + N) = -skew(dm(idx)) * R; % linear acc
         extra = -skew(dm(idx)) * R;
     end
