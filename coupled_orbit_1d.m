@@ -9,7 +9,7 @@ function [sv_derivative] = coupled_orbit_1d(t, sv, masses, J, N, dp, dm)
 
 
 % categorize inputs from state vector.
-w = sv(1:N); % angular velocities (rad/s)
+omega = sv(1:N); % angular velocities (rad/s)
 x = sv(N+1:2*N); % positions (m)
 R = sv(2*N+1:3*N); % rotation matrix 
 phi = sv(3*N+1:4*N); % external forces (N)
