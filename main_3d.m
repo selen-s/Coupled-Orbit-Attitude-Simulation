@@ -48,7 +48,7 @@ sv0 = [omegas x R phi tau]';
 tspan = 0:.01:10;
 
 % PROPAGATE ===============================================================
-options = odeset('RelTol',1e-12,'AbsTol',1e-12);
+options = odeset('RelTol',1e-12,'AbsTol',1e-12); % set ode45 options
 
 [tout, yout] = ode45(@(t, sv)coupled_orbit_3d(t, sv,masses, J, N, dplus, dminus), tspan, sv0, options);
 

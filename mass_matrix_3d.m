@@ -7,17 +7,13 @@
 function M = mass_matrix_3d(dp, dm, N, masses, Rlist, J)
 
 m = zeros(6*N,6*N); % preallocate matrix
-tracksum_row = zeros(3,3*N); % tracking summations - does not reset each iteration
+tracksum_row = zeros(3,6*N); % tracking summations - does not reset each iteration
 
 %% First half of the mass matrix ==========================================
 for idx = 1:N % compute eqn 29 
  
     Jmat = J{idx}; 
-    Jn = Jmat(1:3,1:3); 
-    Jnx = Jn(1,1);
-    Jny = Jn(2,2);
-    Jnz = Jn(3,3);
-
+    Jn = Jmat(1:3,1:3);
     R = Rlist(idx);
     %% account for the summations of previous iterations
     if idx == 1
@@ -26,7 +22,7 @@ for idx = 1:N % compute eqn 29
         tracksum_row(1:3, idx - 1 + N) = [masses(idx - 1); masses(idx-1); masses(idx-1)] ; 
     end
 
-    row = zeros(3,3*N);
+    row = zeros(3,6*N);
     %% put in the stepwise-varied terms (coefficients of ddotX and dotw)
     % for the 0th link:
     if idx == 1 
@@ -50,14 +46,27 @@ for idx = 1:N % compute eqn 29
     % append the new row to m:
     m = [m ; row];
 end
-
-
-
+ clear row
 %% Second half of the mass matirx =========================================
+% use eqn 26 - same for each link
+for idx = 1:6*N-1
+    R1 = Rlist(idx+1);
+    row = zeros(3, 3*N); % re initialize row
+    % angular velocity multipliers:
+    row(1:3, idx:idx+2) = R' * skew(dp);
+    row(1:3, idx+1:idx+3) = -R1' * skew(dm); 
+    
+    % ddotx multipliers:
+    row(1:3, 1) = 1;
+    row(1:3, idx) = 1 ;
 
-% use eqn 26 
+    if idx == 6*N-6
+        row(1:3, idx+1:idx+3) = 1;
+    end
+    % append the new row to m: 
+    m = [m; row];
 
-
+end
 
 M = sparse(m); % return a sparse mass matrix
 

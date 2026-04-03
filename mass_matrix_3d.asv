@@ -50,10 +50,23 @@ for idx = 1:N % compute eqn 29
     % append the new row to m:
     m = [m ; row];
 end
-
-
-
+ clear row
 %% Second half of the mass matirx =========================================
+% use eqn 26 - same for each link
+for idx = 1:3*N-1
+    R1 = Rlist(idx+1);
+    row = zeros(3, 3*N); % re initialize row
+    % angular velocity multipliers:
+    row(1:3, idx) = R' * skew(dp);
+    row(1:3, idx+1) = -
+    
+
+
+    % append the new row to m: 
+    m = [m; row];
+
+end
+
 
 M = sparse(m); % return a sparse mass matrix
 
