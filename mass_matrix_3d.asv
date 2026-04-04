@@ -37,25 +37,24 @@ for idx = 1:3*N % compute eqn 29
     %% put in the stepwise-varied terms (coefficients of ddotX and dotw)
     % for the 0th link:
     if idx == 1 
-        row(1:3, idx:idx+2) = Jn(1:3,1:3); % angular accel term 
+        row(1:3, idx:idx+2) = Jn(1:3,1:3); % angular vel term 
         row(1:3,idx+N:idx+2+N) = -skew(dp) * R * mass; % linear accel term 
         extra = 1; 
+        
     % compute for the middle links: 
     elseif idx > 1 && idx < N
-        row(1:3, idx:idx+2) = Jn;
-        row(1:3, idx+N:idx+2+N) = -skew(dp) * R * mass; 
-        extra = -skew(dp - dm) * R;
-     % for the final link: 
+        row(1:3, idx:idx+2) = Jn; % angular vel term 
+        row(1:3, idx+N:idx+2+N) = -skew(dp) * R * mass; % linear acc 
+        extra = skew(dm - dp) * R;
+
+    % for the final link: 
     elseif idx == N
-        row(1:3, idx:idx+2) = Jn; % angular accb
-        row(1:3, idx+N:idx+2+N) = -skew(dm) * R; % linear acc
+        row(1:3, idx:idx+2) = Jn; % angular velocity
+        row(1:3, idx+N:idx+2+N) = 0; % linear acc
         extra = -skew(dm) * R;
     end
     
     row = row + extra * tracksum_row ; % incorporate factor multiplying the sums
-
-    % append the new row to m:
-    %m = [m ; row];
     
     % put the row into m 
     row_ind = 3*(c-1)+1 : 3*c;
@@ -69,25 +68,32 @@ for idx = 1:3*N % compute eqn 29
     end
 end
 
-clear row idx c R
+clear row idx c R tracksum_row
+
 %% Second half of the mass matirx =========================================
 % use eqn 26 - same for each link
+tracksum_row = zeros(3, 6*N); % reinitialize sum tracking 
 c = 1; % counting variable 1 - 20 
+
 for idx = 1:6*N-1
-    R = Rlist(:,:,c);
-    row = zeros(3, 6*N); % re initialize row
     
-    % ddotx multipliers:
+    R = Rlist(:,:,c); % get the current R 
+    nextR = Rlist(:,:,c+1); % get the next R 
+    row = zeros(3, 6*N); % reinitialize row
+    
+    % linear accel multipliers:
     row(1:3, 1) = 1;
-    row(1:3, idx + 1) = 1 ;
+    row(1:3, idx + 1) = 1;
 
     % angular velocity multipliers:
+    if idx > 1
+        tracksum_row(1:3, idx) = R' * skew(dp);
+        tracksum_row(1:3, idx+1) = nextR'* skew(dm) ;
+    end
+
     if idx < 6*N -3
         row(1:3, idx:idx+2) = R' * skew(dp);
         row(1:3, idx+1:idx+3) = -R' * skew(dm);
-    
-    elseif idx >= 6*N - 3
-        row(1:3, idx:idx+5) = 1;
     end
 
     % put the row into m 
