@@ -20,9 +20,10 @@ end
 c = 1; % count link number
 for idx = 1:3*N % compute eqn 29 
     
+    % get the current values for J, R, mass
     Jn = J(:,:,c);
     R = Rlist(:,:,c);
-    mass = masses(c); % current link mass [kg]
+    mass = masses(c); 
     
     %% account for the summations of previous iterations
     if idx == 1 || c == 1
@@ -78,12 +79,13 @@ c = 1; % counting variable 1 - 20
 for idx = 1:6*N-3
     
     R = Rlist(:,:,c); % get the current R 
-    nextR = Rlist(:,:,c+1); % get the next R 
+    if c < 20
+        nextR = Rlist(:,:,c+1); % get the next R 
+    else
+        nextR = Rlist(:,:,1);
+    end
     row = zeros(3, 6*N); % reinitialize row
-    
-    % linear accel multipliers:
-    row(1:3, idx+N) = -1;
-    row(1:3, N+idx + 1) = 1;
+
 
     % angular velocity multipliers:
     if idx > 1
@@ -92,7 +94,7 @@ for idx = 1:6*N-3
     end
 
     % combine row with the reappearing terms
-    row(1:3,idx:idx+2) = row(1:3,idx;idx+2) + tracksum_row(1:3, idx:idx+2);
+    row(1:3,idx:idx+2) = row(1:3,idx:idx+2) + tracksum_row(1:3, idx:idx+2);
     row(1:3,idx+1:idx+3) = row(1:3, idx+1:idx+3) + tracksum_row(1:3, idx+1:idx+3);
 
     % put the row into m 
@@ -105,6 +107,12 @@ for idx = 1:6*N-3
     else
         c = c + 1;
     end
+end
+
+% put in the 1s for linear acceleration
+m(3*N:6*N,3*N+1) = -1;
+for k = 3*N+1 : 6*N
+    m(k, k) = 1;     
 end
 
 M = sparse(m); % return a sparse mass matrix

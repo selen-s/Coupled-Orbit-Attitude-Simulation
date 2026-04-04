@@ -59,41 +59,55 @@ options = odeset('RelTol',1e-12,'AbsTol',1e-12); % set ode45 options
 omegas_final = yout(:, 1:3); % angular velocity output
 x_final = yout(:, 4:6); % pos output
 
-for idx = 1:3*N % sort the compoennts into vectors for plotting
-    if mod(idx, 3) == 2 % x component 
-        wx(idx) = omegas(idx, 1);
-        posx(idx) = x(idx, 1);
-    elseif mod(idx,3) == 1 % y component
-        wy(idx) = omegas(idx, 2);
-        posy(idx) = x(idx, 2);
-    else % z component
-        wz(idx) = omegas(idx, 3);
-        posz(idx) = x(idx, 3);
-    end
-end
+% sort x, y, z, components for plotting
+% angular velocity [rad/s]
+wx = omegas_final(:, 1);
+wy = omegas_final(:, 2);
+wz = omegas_final(:, 3);
+
+% velocity [m/s]
+xx = x_final(:, 1);
+xy = x_final(:, 2);
+xz = x_final(:, 3);
 
 % plot the results 
 figure(1)
+sgtitle("COA Simulation Results")
+
 subplot(3,2, 1)
 plot(tspan, wx)
 title("Angular velocity (x) [rad/s]")
+xlabel("time (s)")
+ylabel("angular velocity (rad/s)")
 
 subplot(3,2,2)
-plot(tspan, posx)
+plot(tspan, xx)
 title("Velocity (x) [m/s]")
+xlabel("time (s)")
+ylabel("velocity (m/s)")
 
 subplot(3,2,3)
 plot(tspan, wy)
 title("Angular velocity (y) [rad/s]")
+xlabel("time (s)")
+ylabel("angular velocity (rad/s)")
+
 
 subplot(3,2,4)
-plot(tspan, posy)
+plot(tspan, xy)
 title("Velocity (y) [m/s]")
+xlabel("time (s)")
+ylabel("velocity (m/s)")
 
 subplot(3,2,5)
 plot(tspan, wz)
 title("Angular velocity (z) [rad/s]")
+xlabel("time (s)")
+ylabel("angular velocity (rad/s)")
+
 
 subplot(3,2,6)
-plot(tspan, posz)
+plot(tspan, xz)
 title("Velocity (z) [m/s]")
+xlabel("time (s)")
+ylabel("velocity (m/s)")
