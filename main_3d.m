@@ -4,6 +4,7 @@
 % written by Selen Serdar, last updated 4/3/2026
 
 clc;clear;close all;
+tic
 
 N = 20; % number of links
 
@@ -11,7 +12,7 @@ N = 20; % number of links
 omega_tot = 2 * pi / (22.5 * 60);  % How fast is the tether spinning? [rad/s]
 % make sure the R matrices and omegas work
 % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-omegas = zeros(3*N,1); % angular velocity of each link [x, y, z] [rad/s]
+omegas = zeros(3*N, 1) * omega_tot; % angular velocity of each link [x, y, z] [rad/s]
 x = zeros(3*N,1); % position of each link relative to world (x,y,z) [m]
 phi = zeros(3*N,1); % external forces [neglect for now]
 tau = zeros(3*N,1); % torques [neglect for now]
@@ -111,3 +112,5 @@ plot(tspan, xz)
 title("Velocity (z) [m/s]")
 xlabel("time (s)")
 ylabel("velocity (m/s)")
+
+toc
