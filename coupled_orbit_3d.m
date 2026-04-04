@@ -16,7 +16,7 @@ q = sv(6*N+1 : 10*N); % quats
 
 % create the matrix of constants:
 % constM = constant_matrix(); 
-constM = sparse(eye(3*N));
+constM = sparse(eye(6*N));
 massM = mass_matrix_3d(dp, dm, N, masses, q, J); 
 
 for i = 1:N
@@ -27,11 +27,15 @@ for i = 1:N
         w(3) w(2) -w(1) 0] * q(i:i+3);
 end
 
-%sv0 = [omegas; x; qvec; phi; tau]
-
 % return the derivative of state vector
-wx = constM * sv / massM ; 
+state = sparse([omega; x]); % state vector Not derivative
+invmass = pinv(massM);
 
-sv_derivative = [wx; qdot];
+size(sv2)
+size(massM)
+size(constM)
+
+wx =  invmass * constM * state; % take derivative of omega and x terms
+sv_derivative = [wx; qdot]; % concatenate it with quaternions
 
 end

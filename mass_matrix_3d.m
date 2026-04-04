@@ -1,24 +1,23 @@
 %% mass_matrix_3d 
-%n forms the mass matrix with inputs in 3D
+% forms the mass matrix with inputs in 3D
 % dp = distance plus, dm = distance minus, N  = number of links, masses =
-% masses of links, Rlist = rotation matrices at current timestep
-% written by Selen Serdar, last updated 4/3/2026
+% masses of links, qlist = quaternions at current timestep
+% written by Selen Serdar, last updated 4/4/2026
 
 function M = mass_matrix_3d(dp, dm, N, masses, qlist, J)
 
+m = zeros(6*N, 6*N); % preallocate mass matrix size
+tracksum_row = zeros(3,6*N); % tracking summations in terms - does not reset each iteration
 
-m = zeros(6*N,6*N); % preallocate mass matrix
-tracksum_row = zeros(3,6*N); % tracking summations - does not reset each iteration
-
-%% First half of the mass matrix ==========================================
-c = 1; % count link number
-
-% convert the quats back into DCM to use 
+% convert the quats back into DCM for use 
 for k = 1:N
-    q = qlist(4*(k-1)+1 : 4*k)';
+    q = qlist(4*(k-1)+1 : 4*k)'; 
+    q = q / norm(q); % normalize 
     Rlist(:,:,k) = quat2dcm(q);
 end
 
+%% First half of the mass matrix ==========================================
+c = 1; % count link number
 for idx = 1:3*N % compute eqn 29 
     
     Jn = J(:,:,c);
@@ -56,7 +55,11 @@ for idx = 1:3*N % compute eqn 29
     row = row + extra * tracksum_row ; % incorporate factor multiplying the sums
 
     % append the new row to m:
-    m = [m ; row];
+    %m = [m ; row];
+    
+    % put the row into m 
+    row_ind = 3*(c-1)+1 : 3*c;
+    m(row_ind,:) = row;
 
     % decide which link it is calculating
     if c == 20
@@ -65,33 +68,32 @@ for idx = 1:3*N % compute eqn 29
         c = c + 1;
     end
 end
- clear row idx c R
- size(m)
 
+clear row idx c R
 %% Second half of the mass matirx =========================================
 % use eqn 26 - same for each link
 c = 1; % counting variable 1 - 20 
 for idx = 1:6*N-1
     R = Rlist(:,:,c);
     row = zeros(3, 6*N); % re initialize row
-    % angular velocity multipliers:
-    row(1:3, idx:idx+2) = R' * skew(dp);
-    row(1:3, idx+1:idx+3) = -R' * skew(dm); 
     
     % ddotx multipliers:
     row(1:3, 1) = 1;
-    row(1:3, idx) = 1 ;
-    
-    if idx == 6*N-6
-        row(1:3, idx:idx+5) = 1;
-    end
-    r= size(row)
-    m = size(m)
-    % append the new row to m: 
-    m = [m; row];
+    row(1:3, idx + 1) = 1 ;
 
+    % angular velocity multipliers:
+    if idx < 6*N -3
+        row(1:3, idx:idx+2) = R' * skew(dp);
+        row(1:3, idx+1:idx+3) = -R' * skew(dm);
+    end
+    
+    % put the row into m 
+    row_ind = 3*N + 3*(c-1)+1 : 3*N + 3*c;
+    m(row_ind,:) = row;
+
+    % reset c 
     if c == 20
-        c = 1; % reset c 
+        c = 1; 
     else
         c = c + 1;
     end

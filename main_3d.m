@@ -8,10 +8,6 @@ clc;clear;close all;
 N = 20; % number of links
 
 % INITIAL CONDITIONS ======================================================
-
-
-% TODO: what the hell are 22.5 and 60?? Write variables
-
 omega_tot = 2 * pi / (22.5 * 60);  % How fast is the tether spinning? [rad/s]
 % make sure the R matrices and omegas work
 % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
