@@ -1,6 +1,7 @@
-Coupled Orbit-Attitude Simulation
+Coupled Orbit-Attitude Simulation: 
 Newton-Euler Linked RB FEM Model
 
-SLING at Purdue
+SLING at Purdue 
+
 By Selen Serdar, Katie Boland, Aidan Hertel
 
