@@ -3,6 +3,7 @@
 takes inputs of: dp (dist to next link CoM), dm (dist to prev link CoM), N
 (link number), masses (link masses), qlist (quaternions), J (moi tensor)
 outputs: C, matrix of coefficients to be used in solving for state vector
+author: Selen Serdar, last updated: 4/5/2026
 %}
 
 
@@ -21,7 +22,6 @@ c = 1; % initialize c
 %% first half of the matrix (eqn 29-31):
 
 for idx = 1:N
-
     row = zeros(3, 6*N); % initialize empty row 
     R = Rlist(:,:,c); % current link R
     mass = masses(c); % current link mass
@@ -30,7 +30,7 @@ for idx = 1:N
     
     % if external forces && torques are neglected, eqn 29-31 result is the same
     % for all links 
-    row(:, idx:idx + 2) = -skew(omega) * (J * omega); 
+    row(:, idx) = -cross(omega, (J * omega)); 
 
     % reset c 
     if c == 20
@@ -39,18 +39,39 @@ for idx = 1:N
         c = c + 1;
     end
 
+    % put the row into matrix 
+    row_ind = 3*(c-1)+1 : 3*c;
+    coeff(row_ind,:) = row;
 end
 
 %% second half of the matrix (eqn 26)
-tracksum_row = zeros(3, 6*N);
-for idx = 1:N
-    
+clear row 
+row = zeros(3, 6*N); % row accumulates summed terms in each loop iteration
+c = 1; 
+for idx = 1:N-1
+    % get all the current link values again
+    if c < 20
+        nextR = Rlist(:,:,c+1); % get the next R 
+    else
+        nextR = Rlist(:,:,1);
+    end
+    R = Rlist(:,:,c);
+    J = Jlist(:,:,c);
+    omega = omegas(:, idx); % omega vector for current link
+    nextOmega = omegas(:, idx+1); % omega next link
 
+    row(:, 3*N + idx) = R' *(skew(omega) * (skew(omega) * dp)) - nextR' *(skew(nextOmega) * (skew(nextOmega) * dm));
 
-
+    % put the row into coeff 
+    row_ind = 3*N + 3*(c-1)+1 : 3*N + 3*c;
+    coeff(row_ind,:) = row;
+    % reset c 
+    if c == 20
+        c = 1; 
+    else
+        c = c + 1;
+    end
 end
-
-
 
 Cmatrix = sparse(coeff);
 end

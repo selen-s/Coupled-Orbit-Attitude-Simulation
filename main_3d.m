@@ -1,7 +1,7 @@
 % coupled orbit attitude MAIN - 3D
 %
 % propagate coupled orbit attitude simulation in ode45.
-% written by Selen Serdar, last updated 4/3/2026
+% written by Selen Serdar, last updated 4/5/2026
 
 clc;clear;close all;
 tic

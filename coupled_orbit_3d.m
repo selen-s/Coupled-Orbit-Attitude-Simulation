@@ -4,7 +4,7 @@
 %masses (masses) in kg, moment of inertia tensor (J) , and number of links
 %(N)
 % outputs 
-% written by Selen Serdar, last updated 4/3/2026
+% written by Selen Serdar, last updated 4/5/2026
 function [sv_derivative] = coupled_orbit_3d(t, sv, masses, J, N, dp, dm)
 
 % categorize inputs from state vector. these will go into the coeff matrix
@@ -15,14 +15,6 @@ q = sv(6*N+1 : 10*N); % quats
 %tau = sv(13*N+1 : 16*N); % torques (Nm)
 
 massM = mass_matrix_3d(dp, dm, N, masses, q, J); 
-
-% for i = 1:N
-%     w = omega(i:i+2);
-%     qdot(i:i+3) = 1/2 * [0 -w(1) -w(2) -w(3); 
-%         w(1) 0 w(3) -w(2);
-%         w(2) -w(3) 0 w(1);
-%         w(3) w(2) -w(1) 0] * q(i:i+3);
-% end
 for k = 1:N
 
     w_ind = 3*(k-1)+1 : 3*k;

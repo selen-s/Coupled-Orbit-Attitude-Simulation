@@ -2,7 +2,7 @@
 % forms the mass matrix with inputs in 3D
 % dp = distance plus, dm = distance minus, N  = number of links, masses =
 % masses of links, qlist = quaternions at current timestep
-% written by Selen Serdar, last updated 4/4/2026
+% written by Selen Serdar, last updated 4/5/2026
 
 function M = mass_matrix_3d(dp, dm, N, masses, qlist, J)
 
@@ -85,7 +85,6 @@ for idx = 1:6*N-3
         nextR = Rlist(:,:,1);
     end
     row = zeros(3, 6*N); % reinitialize row
-
 
     % angular velocity multipliers:
     if idx > 1
