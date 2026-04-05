@@ -11,7 +11,7 @@ function [sv_derivative] = coupled_orbit_3d(t, sv, masses, J, N, dp, dm)
 omega = sv(1:3*N); % angular velocities (rad/s)
 x = sv(3*N+1:6*N); % positions (m)
 q = sv(6*N+1 : 10*N); % quats 
-%phi = sv(10*N+1 : 13*N); % external forces (N)
+phi = sv(10*N+1 : 13*N); % external forces (N)
 %tau = sv(13*N+1 : 16*N); % torques (Nm)
 
 massM = mass_matrix_3d(dp, dm, N, masses, q, J); 
@@ -36,12 +36,13 @@ end
 state = sparse([omega; x]); % state vector Not derivative
 invmass = inv(massM);
 
-% reshape omega to put it into constM:
+% reshape things to put it into constM:
+phis = reshape(phi, [3,N]);
 omegas = reshape(omega, [3, N]);
-coeffM = coeff_matrix_3d(dp, dm, N, masses, q, J, omegas);
+coeffM = coeff_matrix_3d(dp, dm, N, masses, q, J, omegas,phis);
 
 wx =  invmass * coeffM * state; % take derivative of omega and x terms
 
-sv_derivative = [wx; qdot']; % concatenate it with quaternions
+sv_derivative = [wx; qdot'; phi]; % concatenate it with quaternions
 
 end

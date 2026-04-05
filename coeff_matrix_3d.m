@@ -7,7 +7,7 @@ author: Selen Serdar, last updated: 4/5/2026
 %}
 
 
-function Cmatrix = coeff_matrix_3d(dp, dm, N, masses, qlist, Jlist, omegas)
+function Cmatrix = coeff_matrix_3d(dp, dm, N, masses, qlist, Jlist, omegas, phi)
 
 % convert the quats back into DCM for use 
 for k = 1:N
@@ -20,17 +20,24 @@ coeff = zeros(6*N, 6*N);
 c = 1; % initialize c
 
 %% first half of the matrix (eqn 29-31):
+tracksum_row = zeros(3, 6*N);
 
 for idx = 1:N
     row = zeros(3, 6*N); % initialize empty row 
     R = Rlist(:,:,c); % current link R
-    mass = masses(c); % current link mass
     J = Jlist(:,:,c); % current link MOI
     omega = omegas(:, idx); % omega vector for current link
+    phicurr = phi(:, idx); % phi vector for current link
     
-    % if external forces && torques are neglected, eqn 29-31 result is the same
-    % for all links 
-    row(:, idx) = -cross(omega, (J * omega)); 
+    if idx == 1 % first link 
+        row(:, idx) = -cross(omega, (J * omega)) - skew(dp) * R * phicurr; 
+    elseif idx == N % last link
+        row(:, idx) = -cross(omega, (J * omega)) ;
+        tracksum_row(:, idx-3: idx-1) = skew(dm) * R;
+    else % middle links
+        row(:, idx) = -skew(dp) * R * phicurr ;
+        tracksum_row(:, idx) = - skew(dp - dm) * R *phicurr; 
+    end
 
     % reset c 
     if c == 20
@@ -38,7 +45,7 @@ for idx = 1:N
     else
         c = c + 1;
     end
-
+    row = row + tracksum_row; 
     % put the row into matrix 
     row_ind = 3*(c-1)+1 : 3*c;
     coeff(row_ind,:) = row;
