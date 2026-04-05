@@ -6,7 +6,7 @@ outputs: C, matrix of coefficients to be used in solving for state vector
 %}
 
 
-function Cmatrix = coeff_matrix_3d(dp, dm, N, masses, qlist, Jlist, omegas)
+function Cmatrix = coeff_matrix_3d(dp, dm, N, masses, qlist, J, omegas)
 
 % convert the quats back into DCM for use 
 for k = 1:N
@@ -22,15 +22,15 @@ c = 1; % initialize c
 
 for idx = 1:N
 
-    row = zeros(3, 6*N); % initialize empty row 
+    row = zeros(6*N); % initialize empty row 
     R = Rlist(:,:,c); % current link R
     mass = masses(c); % current link mass
-    J = Jlist(:,:,c); % current link MOI
     omega = omegas(:, idx); % omega vector for current link
     
     % if external forces && torques are neglected, eqn 29-31 result is the same
     % for all links 
-    row(:, idx:idx + 2) = -skew(omega) * (J * omega); 
+    row(idx: idx+2) = -omega
+
 
     % reset c 
     if c == 20
@@ -38,15 +38,6 @@ for idx = 1:N
     else
         c = c + 1;
     end
-
-end
-
-%% second half of the matrix (eqn 26)
-tracksum_row = zeros(3, 6*N);
-for idx = 1:N
-    
-
-
 
 end
 
