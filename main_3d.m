@@ -6,19 +6,23 @@
 clc;clear;close all;
 tic
 
-N = 20; % number of links
+N = 4; % number of links
+
+
 
 % INITIAL CONDITIONS ======================================================
 omega_tot = 2 * pi / (22.5 * 60);  % How fast is the tether spinning? [rad/s]
 
 for idx = 1:3*N-2% populate each vector with a value in a certain axis
     omegas(idx:idx+2) = [0 0 omega_tot]; % angular velocity of each link [x, y, z] [rad/s]
-    phi(idx:idx+2) = [10 0 0]; % external force in x direction [N]
+    phi(idx:idx+2) = [0 0 0]; % external force in x direction [N]
+    x(idx:idx+2) = [0 0 0]; % put it into GSO for now [altitude in m]
 end
+
 omegas = omegas';
 phi = phi';
+x = x';
 
-x = zeros(3*N,1); % position of each link relative to world (x,y,z) [m]
 tau = zeros(3*N,1); % torques [neglect for now]
 
 % to calculate the moment of inertia:
@@ -42,7 +46,12 @@ end
 % set up d vectors in link frame
 dplus = [link_length/2;0;0]; % how far is the current link's CoM from the next link's joint? [m]
 dminus = [-link_length/2;0;0]; % how far is current link's CoM from previous link's joint? [m]
- 
+
+R = repmat(eye(3), 1, 1, N)
+
+m1 = mass_matrix_3d_4(dplus, dminus, N, masses, R, J)
+
+
 % quaternions for integration
 qlist = zeros(N,4);
 for k = 1:N
@@ -54,7 +63,7 @@ qvec = reshape(qlist, [4*N,1]);
 sv0 = [omegas; x; qvec; phi]; % concatenate phi and tau if needed
 
 % timespan [s]
-tspan = 0:.01:1000;
+tspan = 0:.01:10;
 
 % PROPAGATE ===============================================================
 options = odeset('RelTol',1e-12,'AbsTol',1e-12); % set ode45 options

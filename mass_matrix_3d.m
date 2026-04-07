@@ -62,7 +62,7 @@ for idx = 1:3*N % compute eqn 29
     m(row_ind,:) = row;
 
     % decide which link it is calculating
-    if c == 20
+    if c == N
         c = 1; % reset c 
     else
         c = c + 1;
