@@ -4,7 +4,7 @@
 % forms the mass matrix with inputs in 3D
 % dp = distance plus, dm = distance minus, N  = number of links, masses =
 % masses of links, R = rotation matrices at current timestep
-% written by Selen Serdar, last updated 4/5/2026
+% written by Selen Serdar, last updated 4/6/2026
 
 function M = mass_matrix_3d_4(dp, dm, N, masses, R, J)
 

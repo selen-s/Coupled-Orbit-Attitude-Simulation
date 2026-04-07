@@ -3,7 +3,7 @@
 takes inputs of: dp (dist to next link CoM), dm (dist to prev link CoM), N
 (link number), masses (link masses), R (rot matrix), J (moi tensor)
 outputs: C, matrix of coefficients to be used in solving for state vector
-author: Selen Serdar, last updated: 4/5/2026
+author: Selen Serdar, last updated: 4/6/2026
 %}
 
 function C = coeff_matrix_3d_4(dp, dm, N, Rlist, Jlist, omegas)

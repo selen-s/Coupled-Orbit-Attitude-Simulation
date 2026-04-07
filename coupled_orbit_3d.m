@@ -4,7 +4,7 @@
 %masses (masses) in kg, moment of inertia tensor (J) , and number of links
 %(N)
 % outputs 
-% written by Selen Serdar, last updated 4/5/2026
+% written by Selen Serdar, last updated 4/6/2026
 function [sv_dot] = coupled_orbit_3d(t, sv, masses, J, N, dp, dm)
 
 % categorize inputs from state vector. these will go into the coeff matrix

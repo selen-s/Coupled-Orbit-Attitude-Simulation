@@ -10,16 +10,6 @@ N = 4; % number of links
 % INITIAL CONDITIONS ======================================================
 omega_tot = 2 * pi / (22.5 * 60);  % How fast is the tether spinning? [rad/s]
 
-for idx = 1:3*N-2% populate each vector with a value in a certain axis
-    omegas(idx:idx+2) = [0 0 omega_tot]; % angular velocity of each link [x, y, z] [rad/s]
-    %phi(idx:idx+2) = [0 0 0]; % external force in x direction [N]
-    x(idx:idx+2) = [0 0 0]; % put it into GSO for now [altitude in m]
-end
-
-omegas = omegas';
-x = x';
-x_dot0 = 
-
 % to calculate the moment of inertia:
 r = 0.044;  % What is the radius of the tether cable everywhere? [m]
 L = 300000;  % How long is the tether in total? [m]
@@ -38,79 +28,128 @@ for k = 1:N
         0 0 1/2*m*r^2]; 
 end
 
+for k = 1:N
+    idx = 3*(k-1)+1;
+
+    omegas(idx:idx+2) = [0 0 omega_tot];
+
+    x(idx:idx+2) = [36000 + (k-1)*link_length 36000 0];
+
+    x_dot0(idx:idx+2) = [10 10 0];
+end
+
 % set up d vectors in link frame
 dplus = [link_length/2;0;0]; % how far is the current link's CoM from the next link's joint? [m]
 dminus = [-link_length/2;0;0]; % how far is current link's CoM from previous link's joint? [m]
 
-Rflat = repmat(eye(3), 1, 1, N);
-
-% m1 = mass_matrix_3d_4(dplus, dminus, N, masses, R, J);
+R0 = repmat(eye(3), 1, 1, N);
+Rflat = R0(:);
 
 % assemble the initial state vector (column)
-sv0 = [x; x_dot0; omegas; Rflat]; % concatenate phi and tau if needed
+sv0 = [x'; x_dot0'; omegas'; Rflat]; % concatenate phi and tau if needed
 
 % timespan [s]
-tspan = 0:.01:10;
+tspan = 0:.1:10;
 
 % PROPAGATE ===============================================================
 options = odeset('RelTol',1e-12,'AbsTol',1e-12); % set ode45 options
 
 [tout, yout] = ode45(@(t, sv)coupled_orbit_3d(t, sv,masses, J, N, dplus, dminus), tspan, sv0, options);
 
-omegas_final = yout(:, 1:3); % angular velocity output
-x_final = yout(:, 4:6); % pos output
+for i = 1:length(tout)
+    yout_reshaped(:, :, i) = reshape(yout(i, :), [18,N]);
+end
 
-% sort x, y, z, components for plotting
-% angular velocity [rad/s]
-wx = omegas_final(:, 1);
-wy = omegas_final(:, 2);
-wz = omegas_final(:, 3);
+% get the state outputs by LINK at the END TIME. 
+time_end = tout(end);
+for k = 1:N % go by each link 
+    omega_links_end(:, k) = yout_reshaped(7:9, k, length(tout));
+    x_links_end(:, k) = yout_reshaped(1:3, k, length(tout));
+end
 
-% position [m/s]
-xx = x_final(:, 1);
-xy = x_final(:, 2);
-xz = x_final(:, 3);
+% get the state outputs of tether for ALL TIME.
+for link  = 1:N
+    for t = 1:length(tout)
+        omega_time(:, t, link) = yout_reshaped(7:9, link, t);
+        x_time(:, t, link) = yout_reshaped(1:3, link, t);
+    end
+end
 
-% plot the results 
 figure(1)
-sgtitle("COA Simulation Results")
 
-subplot(3,2, 1)
-plot(tspan, wx)
-title("Angular velocity (x) [rad/s]")
-xlabel("time (s)")
-ylabel("angular velocity (rad/s)")
-
-subplot(3,2,2)
-plot(tspan, xx)
-title("Velocity (x) [m/s]")
-xlabel("time (s)")
-ylabel("velocity (m/s)")
-
-subplot(3,2,3)
-plot(tspan, wy)
-title("Angular velocity (y) [rad/s]")
-xlabel("time (s)")
-ylabel("angular velocity (rad/s)")
+subplot()
 
 
-subplot(3,2,4)
-plot(tspan, xy)
-title("Velocity (y) [m/s]")
-xlabel("time (s)")
-ylabel("velocity (m/s)")
-
-subplot(3,2,5)
-plot(tspan, wz)
-title("Angular velocity (z) [rad/s]")
-xlabel("time (s)")
-ylabel("angular velocity (rad/s)")
 
 
-subplot(3,2,6)
-plot(tspan, xz)
-title("Velocity (z) [m/s]")
-xlabel("time (s)")
-ylabel("velocity (m/s)")
 
+
+
+
+
+
+
+% plot the results - LINKWISE
+figure(1)
+% for link = 1:N
+%     h(link) = animatedline('LineWidth',2);
+% end
+% axis equal
+% view(3)
+% for t = 1:length(tout)
+%     for idx = 1:N
+%         addpoints(h(idx), x_time(1, t, idx)/1000,x_time(2, t, idx)/1000,x_time(3, t, idx)/1000 ); 
+%     end
+%     drawnow
+% end
+% 
+% xlim([35 370])
+% ylim([-200 200])
+% zlim([-200 200])
+% title("COA Simulation Results Over Time")
+% xlabel("$x (km)$")
+% ylabel("$y (km)$")
+% zlabel("$z (km)$")
+
+% figure(2)
+% sgtitle("COA Simulation Results Against Time")
+% 
+% subplot(3,2, 1)
+% plot(tspan, wx)
+% title("Angular velocity (x) [rad/s]")
+% xlabel("time (s)")
+% ylabel("angular velocity (rad/s)")
+% 
+% subplot(3,2,2)
+% plot(tspan, xx)
+% title("Position (x) [m/s]")
+% xlabel("time (s)")
+% ylabel("position (m/s)")
+% 
+% subplot(3,2,3)
+% plot(tspan, wy)
+% title("Angular velocity (y) [rad/s]")
+% xlabel("time (s)")
+% ylabel("angular velocity (rad/s)")
+% 
+% 
+% subplot(3,2,4)
+% plot(tspan, xy)
+% title("Position (y) [m/s]")
+% xlabel("time (s)")
+% ylabel("position (m/s)")
+% 
+% subplot(3,2,5)
+% plot(tspan, wz)
+% title("Angular velocity (z) [rad/s]")
+% xlabel("time (s)")
+% ylabel("angular velocity (rad/s)")
+% 
+% 
+% subplot(3,2,6)
+% plot(tspan, xz)
+% title("Position (z) [m/s]")
+% xlabel("time (s)")
+% ylabel("Position (m/s)")
+% 
 toc
