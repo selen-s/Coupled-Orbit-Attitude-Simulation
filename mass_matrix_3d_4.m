@@ -3,7 +3,7 @@
 %% mass_matrix_3d 
 % forms the mass matrix with inputs in 3D
 % dp = distance plus, dm = distance minus, N  = number of links, masses =
-% masses of links, qlist = quaternions at current timestep
+% masses of links, R = rotation matrices at current timestep
 % written by Selen Serdar, last updated 4/5/2026
 
 function M = mass_matrix_3d_4(dp, dm, N, masses, R, J)
@@ -37,5 +37,7 @@ for i = 2:N
         m(3*i-2+3*N:3*i+3*N, 3*beta+1:3*beta+3) =m(3*i-2+3*N:3*i+3*N, 3*beta+1:3*beta+3) + B;
     end
 end
+
+M = sparse(m);
 
 end

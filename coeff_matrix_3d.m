@@ -6,7 +6,6 @@ outputs: C, matrix of coefficients to be used in solving for state vector
 author: Selen Serdar, last updated: 4/5/2026
 %}
 
-
 function Cmatrix = coeff_matrix_3d(dp, dm, N, masses, qlist, Jlist, omegas, phi)
 
 % convert the quats back into DCM for use 
